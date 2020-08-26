@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Goal } from '../goal';
 import { GoalService } from '../goal-service/goal.service';
+import { AlertService } from '../alert-service/alert.service';
+import { QuoteRequestService } from '../quote-http/quote-request.service';
+
+
+import { Quote } from '../quote-class/quote';
 
 
 @Component({
@@ -10,7 +16,9 @@ import { GoalService } from '../goal-service/goal.service';
 })
 export class GoalComponent implements OnInit {
 
- goals:Goal[];
+  goals:Goal[];
+  alertService:AlertService;
+  quote:Quote;
 
   addNewGoal(goal) {
     let goalLength = this.goals.length;
@@ -22,21 +30,34 @@ export class GoalComponent implements OnInit {
   toggleDetails(index) {
     this.goals[index].showDescription = !this.goals[index].showDescription;
   }
-  deleteGoal(isComplete, index) {
+
+  deleteGoal(isComplete, index){
     if (isComplete) {
       let toDelete = confirm(`Are you sure you want to delete ${this.goals[index].name}?`)
 
-
-      if (toDelete) {
-        this.goals.splice(index, 1)
+      if (toDelete){
+        this.goals.splice(index,1)
+        this.alertService.alertMe("The goal has been deleted")
       }
     }
   }
 
-  constructor(goalService:GoalService) {
+  constructor(goalService:GoalService, alertService:AlertService, private quoteService:QuoteRequestService) {
     this.goals = goalService.getGoals()
-   }
-
-  ngOnInit() {
+    this.alertService = alertService;
   }
-}
+  ngOnInit() {
+
+    this.quoteService.quoteRequest()
+    this.quote = this.quoteService.quote
+    }
+
+    // this.http.get<ApiResponse>("http://quotes.stormconsultancy.co.uk/random.json").subscribe(data=>{
+    //   // Succesful API request
+    //   this.quote = new Quote(data.author, data.quote)
+    // },err=>{
+    //     this.quote = new Quote("Winston Churchill","Never never give up!")
+    //     console.log("An error occurred")
+    // });
+    
+  }
